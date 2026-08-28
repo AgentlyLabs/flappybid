@@ -1,0 +1,20 @@
+# Manual-only since 2026-08-22: Bot Fight Mode (rightly) blocks this
+# runner's curl at Cloudflare's edge, and the close never depended on it —
+# ensureFinalized runs lazily on leaderboard/champion reads and on admin
+# approval. Kept dispatchable as a manual nudge; CRON_SECRET stays in env
+# regardless (it guards /api/close and salts the IP hashes).
+name: Daily board close
+on:
+  workflow_dispatch: {}
+
+jobs:
+  close:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hit /api/close
+        # the public domain, not the Railway one — the generated
+        # *.up.railway.app domain is removed so nothing bypasses Cloudflare
+        run: |
+          curl -fsS --max-time 30 \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "https://flappybid.lol/api/close"

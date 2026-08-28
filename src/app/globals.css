@@ -1,0 +1,311 @@
+@import "tailwindcss";
+
+@theme {
+  /* the Flappy Bird palette — flat colors only, no gradients */
+  --color-sky: #faf3e0;
+  --color-sky-deep: #e9dfc2;
+  --color-sand: #ded895;
+  --color-sand-deep: #cfc271;
+  --color-grass: #9ce659;
+  --color-grass-deep: #5b8a26;
+  --color-pipe: #73bf2e;
+  --color-pipe-light: #9ce659;
+  --color-pipe-dark: #4e8321;
+  --color-ink: #26221c;
+  --color-paper: #fffdf2;
+  --color-muted: #75705a;
+  --color-gold: #f5c842;
+  --color-orange: #f87317;
+  --color-orange-deep: #d95a13;
+  --color-red: #e6533c;
+  /* always-dark: modal backdrops and text outlines, in both themes */
+  --color-scrim: #26221c;
+  --color-silver: #cfd2dc;
+  --color-bronze: #c98146;
+
+  --font-pixel: var(--font-press-start), monospace;
+  --font-sans: var(--font-vt323), monospace;
+  --font-mono: var(--font-press-start), monospace;
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  background: var(--color-sky);
+  color: var(--color-ink);
+  font-size: 1.25rem;
+  line-height: 1.35;
+}
+
+/* night mode — the Flappy Bird night theme, toggled via the header button
+   (html.dark + localStorage, light by default). Overriding the theme tokens
+   flips every color utility (backgrounds, text, borders) at once; ink and
+   paper swap roles (light outlines + text on dark surfaces). Gold, orange
+   and the game canvas keep their daylight colors. */
+html.dark {
+  color-scheme: dark;
+  --color-sky: #1b2337;
+  --color-sky-deep: #131a2a;
+  --color-sand: #4d4530;
+  --color-sand-deep: #3a3424;
+  --color-ink: #efe8d2;
+  --color-paper: #242c40;
+  --color-muted: #a09a86;
+  --color-red: #ff6f58;
+}
+/* gold surfaces keep daylight text — cream-on-gold is unreadable */
+.dark .bg-gold {
+  color: #26221c;
+}
+/* hard shadows need more weight to read against a dark page */
+.dark .pixel-card {
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5);
+}
+.dark .pixel-panel {
+  box-shadow:
+    inset 3px 3px 0 rgba(255, 255, 255, 0.12),
+    inset -3px -3px 0 rgba(0, 0, 0, 0.3),
+    4px 4px 0 rgba(0, 0, 0, 0.5);
+}
+/* the pressable ledge stays darker than the button, not cream */
+.dark .pixel-btn {
+  box-shadow: 0 4px 0 #0e1119;
+}
+.dark .pixel-btn:not(:disabled):active {
+  box-shadow: 0 0 0 #0e1119;
+}
+.dark .ground-dirt {
+  background: repeating-linear-gradient(
+    -45deg,
+    #423b29 0 14px,
+    var(--color-sand) 14px 28px
+  );
+}
+
+/* pixel-crisp scaling for game art only — favicons/logos stay smooth */
+canvas,
+img.pixel-art {
+  image-rendering: pixelated;
+}
+
+/* product favicon in a chunky frame; the <Favicon> component trims the
+   icon's baked-in padding so it fills this box edge-to-edge */
+.icon-frame {
+  border: 2px solid var(--color-ink);
+  background: var(--color-paper);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.icon-frame > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* real-world logos, not sprites — don't nearest-neighbor them */
+  image-rendering: auto;
+}
+
+/* white card with a hard offset shadow — the basic surface */
+.pixel-card {
+  background: var(--color-paper);
+  border: 3px solid var(--color-ink);
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.28);
+}
+
+/* beveled sand panel, like the in-game score/medal panel */
+.pixel-panel {
+  background: var(--color-sand);
+  border: 3px solid var(--color-ink);
+  box-shadow:
+    inset 3px 3px 0 rgba(255, 255, 255, 0.45),
+    inset -3px -3px 0 rgba(0, 0, 0, 0.14),
+    4px 4px 0 rgba(0, 0, 0, 0.28);
+}
+
+/* chunky pressable button */
+.pixel-btn {
+  font-family: var(--font-pixel);
+  text-transform: uppercase;
+  border: 3px solid var(--color-ink);
+  box-shadow: 0 4px 0 var(--color-ink);
+}
+.pixel-btn:not(:disabled):active {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 var(--color-ink);
+}
+.pixel-btn:disabled {
+  opacity: 0.6;
+}
+
+/* "GET READY!"-style lettering: solid fill with a hard dark outline.
+   Uses scrim (not ink) so the outline stays dark in night mode too. */
+.text-outline {
+  text-shadow:
+    -2px -2px 0 var(--color-scrim),
+    2px -2px 0 var(--color-scrim),
+    -2px 2px 0 var(--color-scrim),
+    2px 2px 0 var(--color-scrim),
+    -2px 0 0 var(--color-scrim),
+    2px 0 0 var(--color-scrim),
+    0 -2px 0 var(--color-scrim),
+    0 2px 0 var(--color-scrim),
+    0 5px 0 var(--color-scrim);
+}
+
+/* diagonal-striped dirt, hard color stops = crisp stripes */
+.ground-dirt {
+  background: repeating-linear-gradient(
+    -45deg,
+    #ece7b3 0 14px,
+    var(--color-sand) 14px 28px
+  );
+}
+
+@keyframes float-y {
+  0%,
+  100% {
+    transform: translateY(-4px);
+  }
+  50% {
+    transform: translateY(4px);
+  }
+}
+
+.animate-float {
+  animation: float-y 2.4s steps(4) infinite;
+}
+
+/* a glossy highlight that sweeps across the logo banner every few seconds —
+   the one deliberately smooth accent on an otherwise stepped, pixel UI, so the
+   banner catches the eye without looking broken */
+@keyframes logo-shine {
+  0% {
+    transform: translateX(-160%) skewX(-18deg);
+  }
+  55%,
+  100% {
+    transform: translateX(320%) skewX(-18deg);
+  }
+}
+
+.logo-shine {
+  animation: logo-shine 4.5s ease-in-out infinite;
+}
+
+/* chunky two-hop jump for the chat button when a new message lands */
+@keyframes chat-bump {
+  0%,
+  40%,
+  100% {
+    transform: translateY(0);
+  }
+  15% {
+    transform: translateY(-10px);
+  }
+  55% {
+    transform: translateY(-5px);
+  }
+  70% {
+    transform: translateY(0);
+  }
+}
+
+.chat-bump {
+  animation: chat-bump 0.7s steps(5);
+}
+
+/* chat text effects — chunky steps() everywhere so they read as pixel art,
+   not smooth CSS. Letters get per-index negative delays inline, so a wave
+   is already mid-roll when it appears. */
+@keyframes chat-wave-ch {
+  0%,
+  50%,
+  100% {
+    transform: translateY(0);
+  }
+  25% {
+    transform: translateY(-3px);
+  }
+  75% {
+    transform: translateY(3px);
+  }
+}
+
+.chat-wave-ch {
+  animation: chat-wave-ch 0.88s steps(3) infinite;
+}
+
+@keyframes chat-shake-ch {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-1px, 1px);
+  }
+  50% {
+    transform: translate(1px, -1px);
+  }
+  75% {
+    transform: translate(1px, 1px);
+  }
+}
+
+.chat-shake-ch {
+  animation: chat-shake-ch 0.33s steps(1) infinite;
+}
+
+/* rainbow: letters are statically striped by index; the whole span cycles
+   hues on top so the stripe crawls */
+@keyframes chat-hue {
+  to {
+    filter: hue-rotate(360deg);
+  }
+}
+
+.chat-rainbow {
+  animation: chat-hue 2.5s steps(10) infinite;
+}
+
+/* whole-panel jolt when someone's nudge lands */
+@keyframes chat-nudge {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  12% {
+    transform: translate(-6px, 3px);
+  }
+  25% {
+    transform: translate(5px, -4px);
+  }
+  37% {
+    transform: translate(-4px, -3px);
+  }
+  50% {
+    transform: translate(4px, 3px);
+  }
+  62% {
+    transform: translate(-3px, 2px);
+  }
+  75% {
+    transform: translate(3px, -2px);
+  }
+  87% {
+    transform: translate(-2px, 1px);
+  }
+}
+
+.chat-nudge {
+  animation: chat-nudge 0.65s steps(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-wave-ch,
+  .chat-shake-ch,
+  .chat-rainbow,
+  .chat-nudge {
+    animation: none;
+  }
+}
